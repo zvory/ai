@@ -1,10 +1,7 @@
 package rip.az;
 
 import org.jetbrains.annotations.NotNull;
-import rip.az.LocationGenerator.DownAndRightLocationGenerator;
-import rip.az.LocationGenerator.LocationGenerator;
-import rip.az.LocationGenerator.RowLocationGenerator;
-import rip.az.LocationGenerator.UpAndRightLocationGenerator;
+import rip.az.LocationGenerator.*;
 
 import java.util.Arrays;
 
@@ -12,6 +9,7 @@ public class ConnectFourBoard implements Board {
     public static final LocationGenerator ROW_LOCATION_GENERATOR = new RowLocationGenerator();
     public static final LocationGenerator DOWN_AND_RIGHT_LOCATION_GENERATOR = new DownAndRightLocationGenerator();
     public static final LocationGenerator UP_AND_RIGHT_LOCATION_GENERATOR = new UpAndRightLocationGenerator();
+    public static final ColumnLocationGenerator COLUMN_LOCATION_GENERATOR = new ColumnLocationGenerator();
     private final int WIDTH = 7;
     private final int HEIGHT = 6;
     private final int CONNECT_AMOUNT = 4;
@@ -22,6 +20,7 @@ public class ConnectFourBoard implements Board {
 
     public ConnectFourBoard() {
         this.board = new Player[WIDTH * HEIGHT];
+        Arrays.fill(this.board, Player.NONE);
         this.turn = 0;
         this.heights = new int[WIDTH];
     }
@@ -33,6 +32,9 @@ public class ConnectFourBoard implements Board {
     }
 
     public Player getContentsAt(int column, int row) {
+        if (isOutOfBounds(column, row)) {
+            throw new IllegalArgumentException("Attempting to access OutOfBounds content. Column: " + column + ", row: " + row);
+        }
         return board[rowColumnToBoardIndex(column, row)];
     }
 
@@ -50,25 +52,43 @@ public class ConnectFourBoard implements Board {
         return new ConnectFourBoard(newBoard, turn, heights);
     }
 
+    @Override
+    public String toString() {
+        String boardString = "0123456\n";
+        for (int row = HEIGHT - 1; row >= 0; row--) {
+            for (int column = 0; column < WIDTH; column++) {
+                Player contentsAt = getContentsAt(column, row);
+                boardString += switch (contentsAt) {
+                    case NONE -> ".";
+                    case ONE -> "o";
+                    case TWO -> "x";
+                };
+            }
+            boardString += '\n';
+        }
+        return "Turn: " + turn + "\n" + boardString;
+    }
+
+    public void applyMoveSeries(int[] moves) {
+        for (int move : moves) {
+            applyMove(new ConnectFourMove(move));
+        }
+    }
+
     public void applyMove(@NotNull ConnectFourMove move) {
         int column = move.getColumn();
         int row = columnToOpenSpot(column);
 
-        if (row == HEIGHT) {
-            System.err.println("Placing tile on column that's topped out. Column: " + column);
-            System.err.println(this.toString());
-            throw new IllegalStateException();
-        }
-        if (getContentsAt(column, row) != Player.NONE) {
-            System.err.println("Placing tile on spot that's already filled. Column: " + column);
-            System.err.println(this.toString());
-            throw new IllegalStateException();
+        if (isOutOfBounds(column, row)) {
+            System.err.println("Placing tile in out of bounds. Column: " + column + " Row: " + row);
+            System.err.println(this);
+            throw new IllegalArgumentException();
         }
 
         Player newContents = Player.getTurn(turn);
         turn++;
         board[rowColumnToBoardIndex(column, row)] = newContents;
-        heights[row]++;
+        heights[column]++;
     }
 
     @Override
@@ -86,6 +106,9 @@ public class ConnectFourBoard implements Board {
         }
 
         for (int column = 0; column < WIDTH; column++) {
+            result = evalSeries(column, 0, COLUMN_LOCATION_GENERATOR);
+            if (result != Player.NONE) return result;
+
             result = evalSeries(column, HEIGHT - 1, DOWN_AND_RIGHT_LOCATION_GENERATOR);
             if (result != Player.NONE) return result;
 
