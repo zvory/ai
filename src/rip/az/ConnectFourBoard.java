@@ -6,6 +6,8 @@ import rip.az.LocationGenerator.LocationGenerator;
 import rip.az.LocationGenerator.RowLocationGenerator;
 import rip.az.LocationGenerator.UpAndRightLocationGenerator;
 
+import java.util.Arrays;
+
 public class ConnectFourBoard implements Board {
     public static final LocationGenerator ROW_LOCATION_GENERATOR = new RowLocationGenerator();
     public static final LocationGenerator DOWN_AND_RIGHT_LOCATION_GENERATOR = new DownAndRightLocationGenerator();
@@ -44,7 +46,8 @@ public class ConnectFourBoard implements Board {
 
     @Override
     public ConnectFourBoard clone() {
-        return new ConnectFourBoard(board, turn, heights);
+        Player[] newBoard = Arrays.copyOf(board, WIDTH * HEIGHT);
+        return new ConnectFourBoard(newBoard, turn, heights);
     }
 
     public void applyMove(@NotNull ConnectFourMove move) {
