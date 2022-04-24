@@ -6,7 +6,6 @@ public class ConnectFourMove extends Move {
     public ConnectFourMove(int column) {
         this.column = column;
     }
-
     public int getColumn() {
         return column;
     }

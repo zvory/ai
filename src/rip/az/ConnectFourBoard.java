@@ -3,7 +3,9 @@ package rip.az;
 import org.jetbrains.annotations.NotNull;
 import rip.az.LocationGenerator.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class ConnectFourBoard implements Board {
     public static final LocationGenerator ROW_LOCATION_GENERATOR = new RowLocationGenerator();
@@ -38,7 +40,7 @@ public class ConnectFourBoard implements Board {
         return board[rowColumnToBoardIndex(column, row)];
     }
 
-    private int columnToOpenSpot(int column) {
+    private int openRowForColumn(int column) {
         return heights[column];
     }
 
@@ -77,7 +79,7 @@ public class ConnectFourBoard implements Board {
 
     public void applyMove(@NotNull ConnectFourMove move) {
         int column = move.getColumn();
-        int row = columnToOpenSpot(column);
+        int row = openRowForColumn(column);
 
         if (isOutOfBounds(column, row)) {
             System.err.println("Placing tile in out of bounds. Column: " + column + " Row: " + row);
@@ -89,6 +91,20 @@ public class ConnectFourBoard implements Board {
         turn++;
         board[rowColumnToBoardIndex(column, row)] = newContents;
         heights[column]++;
+    }
+
+    public boolean isTie() {
+        for (int height : heights) {
+            if (height != HEIGHT) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public int getTurn() {
+        return turn;
     }
 
     @Override
@@ -116,6 +132,17 @@ public class ConnectFourBoard implements Board {
             if (result != Player.NONE) return result;
         }
         return Player.NONE;
+    }
+
+    @Override
+    public List<ConnectFourMove> getPossibleMoves() {
+        ArrayList<ConnectFourMove> moves = new ArrayList<>();
+        for (int column = 0; column < WIDTH; column++) {
+            if (!isOutOfBounds(column, openRowForColumn(column))) {
+                moves.add(new ConnectFourMove(column));
+            }
+        }
+        return moves;
     }
 
     @NotNull

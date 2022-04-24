@@ -1,6 +1,13 @@
 package rip.az;
 
+import java.util.List;
+
 public interface Board {
-    // TODO this should be Player not TileContents
     Player getWinner();
+
+    List<? extends Move> getPossibleMoves();
+
+    boolean isTie();
+
+    int getTurn();
 }
