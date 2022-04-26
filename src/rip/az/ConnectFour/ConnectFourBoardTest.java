@@ -1,9 +1,13 @@
 package rip.az.ConnectFour;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import rip.az.Player;
+
+import java.util.List;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -72,4 +76,29 @@ class ConnectFourBoardTest {
         assertEquals(Player.TWO, board.getWinner(), "Expected player two to win in \n" + board.toString());
     }
 
+
+    @Test
+    void testFastGetWinner() {
+        // tested to work up to 1000
+        // keep it at 100 normally for faster tests
+        // only errors ever found were sub 100
+        final int testCases = 100;
+        final int seed = 0;
+        Random rand = new Random(0);
+        for (int test = 0; test < testCases; test++) {
+            board = new ConnectFourBoard();
+            while (!board.noMoreMovesPossible()) {
+                List<ConnectFourMove> moves = board.getPossibleMoves();
+                ConnectFourMove move = moves.get(rand.nextInt(moves.size()));
+                board.applyMove(move);
+                Player slowWinner = board.getWinner();
+                Player fastWinner = board.getIsLatestMoveWinning();
+
+                assertEquals(slowWinner, fastWinner, "Board: " + board + "With latest move " + move + " on test " + test);
+                if (fastWinner != Player.NONE) {
+                    break;
+                }
+            }
+        }
+    }
 }

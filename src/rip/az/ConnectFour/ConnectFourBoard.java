@@ -15,8 +15,8 @@ public class ConnectFourBoard implements Board<ConnectFourMove> {
     public static final LocationGenerator DOWN_AND_RIGHT_LOCATION_GENERATOR = new DownAndRightLocationGenerator();
     public static final LocationGenerator UP_AND_RIGHT_LOCATION_GENERATOR = new UpAndRightLocationGenerator();
     public static final ColumnLocationGenerator COLUMN_LOCATION_GENERATOR = new ColumnLocationGenerator();
-    private final int WIDTH = 7;
-    private final int HEIGHT = 6;
+    final int WIDTH = 7;
+    final int HEIGHT = 6;
     private final int CONNECT_AMOUNT = 4;
     // r0c0, r0c1.... c5c5, r5c6
     Player[] board;
@@ -25,6 +25,9 @@ public class ConnectFourBoard implements Board<ConnectFourMove> {
     List<Integer> moveSequence;
 
     public ConnectFourBoard() {
+        if (WIDTH < HEIGHT) {
+            throw new IllegalStateException("Ruh roh getPointDiagonallyLeftAtTop is not going to work if WIDTH < HEIGHT");
+        }
         this.board = new Player[WIDTH * HEIGHT];
         this.moveSequence = new ArrayList<>();
         Arrays.fill(this.board, Player.NONE);
@@ -64,8 +67,9 @@ public class ConnectFourBoard implements Board<ConnectFourMove> {
 
     @Override
     public String toString() {
-        String boardString = "0123456\n";
+        String boardString = " 0123456\n";
         for (int row = HEIGHT - 1; row >= 0; row--) {
+            boardString += row;
             for (int column = 0; column < WIDTH; column++) {
                 Player contentsAt = getContentsAt(column, row);
                 boardString += switch (contentsAt) {
@@ -76,7 +80,8 @@ public class ConnectFourBoard implements Board<ConnectFourMove> {
             }
             boardString += '\n';
         }
-        return "Turn: " + turn + "\n" + boardString;
+        boardString = "Turn: " + turn + "\n" + boardString + " 0123456\n";
+        return boardString + moveSequence + "\n";
     }
 
     public void applyMoveSeries(int[] moves) {
@@ -137,35 +142,130 @@ public class ConnectFourBoard implements Board<ConnectFourMove> {
         Player result;
         for (int row = 0; row < HEIGHT; row++) {
             result = evalSeries(0, row, ROW_LOCATION_GENERATOR);
-            if (result != Player.NONE) return result;
+            if (result != Player.NONE)
+                return result;
 
             result = evalSeries(0, row, DOWN_AND_RIGHT_LOCATION_GENERATOR);
-            if (result != Player.NONE) return result;
+            if (result != Player.NONE)
+                return result;
 
             result = evalSeries(0, row, UP_AND_RIGHT_LOCATION_GENERATOR);
-            if (result != Player.NONE) return result;
+            if (result != Player.NONE)
+                return result;
         }
 
         for (int column = 0; column < WIDTH; column++) {
             result = evalSeries(column, 0, COLUMN_LOCATION_GENERATOR);
-            if (result != Player.NONE) return result;
+            if (result != Player.NONE)
+                return result;
 
             result = evalSeries(column, HEIGHT - 1, DOWN_AND_RIGHT_LOCATION_GENERATOR);
-            if (result != Player.NONE) return result;
+            if (result != Player.NONE)
+                return result;
 
             result = evalSeries(column, 0, UP_AND_RIGHT_LOCATION_GENERATOR);
-            if (result != Player.NONE) return result;
+            if (result != Player.NONE)
+                return result;
         }
         return Player.NONE;
+    }
+
+    // TODO make this private
+    public int[] getPointDiagonallyLeftBelow(int column, int row) {
+        if (column == row) {
+            return new int[]{
+                    0, 0
+            };
+        } else if (column > row) {
+            /*
+            .......
+            .......
+            .......
+            .......
+            .....x.
+            .......
+             */
+            return new int[]{
+                    column - row,
+                    0
+            };
+        } else {
+            return new int[]{
+                    0,
+                    row - column
+            };
+        }
+    }
+
+
+    // TODO make this private
+    public int[] getPointDiagonallyLeftAbove(int column, int row) {
+        if (row + column == HEIGHT - 1) { // TODO this should be math.min(WIDTH,HEIGHT)-1 or something
+            /*
+            x......0,5
+            .x.....1,4
+            ..x....2,3
+            ...x...3,2
+            ....x..4,1
+            .....x.5,0
+             */
+            return new int[]{
+                    0, HEIGHT - 1
+            };
+        } else if (column + row > HEIGHT - 1) {
+            /*
+            .x.....1,5->6,5 = 1,5
+            ..x....2,4->6,4 = 1,5
+            ...x...3,3->6,3 = 1,5
+            ....x..4,2->6,2 = 1,5
+            .....x.5,1->6,1 = 1,5
+            ......x6,0->6,0 = 1,5
+             */
+            return new int[]{
+                    column - (HEIGHT - 1 - row), // 4 - (6 - 1 - 2) = 4-3=1
+                    HEIGHT - 1
+            };
+        } else {
+            /*
+            .......
+            x......
+            .x.....
+            ..x....
+            ...x...
+            ....x..
+             */
+            return new int[]{
+                    0, row + column
+            };
+        }
     }
 
     /*
     Only checks to see if the latest move won the game
      */
     @Override
-    public Player fastGetWinner() {
+    public Player getIsLatestMoveWinning() {
         int column = moveSequence.get(moveSequence.size() - 1);
         int row = heights[column] - 1;
+
+        Player result;
+
+        result = evalSeries(0, row, ROW_LOCATION_GENERATOR);
+        if (result != Player.NONE) return result;
+
+        result = evalSeries(column, 0, COLUMN_LOCATION_GENERATOR);
+        if (result != Player.NONE) return result;
+
+
+        int[] startpoint;
+        startpoint = getPointDiagonallyLeftBelow(column, row);
+        result = evalSeries(startpoint[0], startpoint[1], UP_AND_RIGHT_LOCATION_GENERATOR);
+        if (result != Player.NONE) return result;
+
+        startpoint = getPointDiagonallyLeftAbove(column, row);
+        result = evalSeries(startpoint[0], startpoint[1], DOWN_AND_RIGHT_LOCATION_GENERATOR);
+        if (result != Player.NONE) return result;
+
         return Player.NONE;
     }
 

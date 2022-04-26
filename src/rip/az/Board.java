@@ -5,7 +5,7 @@ import java.util.List;
 public interface Board<M extends Move> {
     Player getWinner();
 
-    Player fastGetWinner();
+    Player getIsLatestMoveWinning();
 
     List<M> getPossibleMoves();
 
