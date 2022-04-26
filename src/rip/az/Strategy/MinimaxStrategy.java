@@ -1,4 +1,9 @@
-package rip.az;
+package rip.az.Strategy;
+
+import rip.az.Board;
+import rip.az.Move;
+import rip.az.Player;
+import rip.az.Util;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,7 +24,7 @@ public class MinimaxStrategy<B extends Board<M>, M extends Move> extends Strateg
             } else {
                 List<Move> moves = (List<Move>) board.getPossibleMoves();
                 movesDone++;
-                Move move = moves.get(AIUtil.randInRange(moves.size()));
+                Move move = moves.get(Util.randInRange(moves.size()));
                 board.applyMove(move);
             }
         }

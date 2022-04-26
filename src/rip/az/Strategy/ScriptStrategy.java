@@ -1,4 +1,8 @@
-package rip.az;
+package rip.az.Strategy;
+
+import rip.az.Board;
+import rip.az.ConnectFour.ConnectFourMove;
+import rip.az.Move;
 
 import java.util.Arrays;
 

@@ -1,7 +1,9 @@
-package rip.az;
+package rip.az.ConnectFour;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import rip.az.Player;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -37,7 +39,7 @@ class ConnectFourBoardTest {
     })
     void getWinnerNoWinner(String moveSequence) {
         applyMoveSequenceString(moveSequence);
-        assertEquals(Player.NONE, board.getWinner());
+        Assertions.assertEquals(Player.NONE, board.getWinner());
     }
 
     @ParameterizedTest

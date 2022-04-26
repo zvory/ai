@@ -1,7 +1,9 @@
-package rip.az;
+package rip.az.ConnectFour;
 
 import org.jetbrains.annotations.NotNull;
+import rip.az.Board;
 import rip.az.LocationGenerator.*;
+import rip.az.Player;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -129,6 +131,7 @@ public class ConnectFourBoard implements Board<ConnectFourMove> {
         return new ConnectFourMove(move);
     }
 
+
     @Override
     public Player getWinner() {
         Player result;
@@ -153,6 +156,16 @@ public class ConnectFourBoard implements Board<ConnectFourMove> {
             result = evalSeries(column, 0, UP_AND_RIGHT_LOCATION_GENERATOR);
             if (result != Player.NONE) return result;
         }
+        return Player.NONE;
+    }
+
+    /*
+    Only checks to see if the latest move won the game
+     */
+    @Override
+    public Player fastGetWinner() {
+        int column = moveSequence.get(moveSequence.size() - 1);
+        int row = heights[column] - 1;
         return Player.NONE;
     }
 

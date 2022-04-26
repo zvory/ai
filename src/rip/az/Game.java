@@ -1,5 +1,9 @@
 package rip.az;
 
+import rip.az.Strategy.HumanInputStrategy;
+import rip.az.Strategy.MinimaxStrategy;
+import rip.az.Strategy.Strategy;
+
 public class Game<B extends Board<M>, M extends Move> {
     private B board;
 

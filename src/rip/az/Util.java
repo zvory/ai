@@ -2,7 +2,7 @@ package rip.az;
 
 import java.util.Random;
 
-public class AIUtil {
+public class Util {
     private static final long SEED = 0;
     private static final Random random = new Random(SEED);
 

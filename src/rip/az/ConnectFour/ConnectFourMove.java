@@ -1,4 +1,6 @@
-package rip.az;
+package rip.az.ConnectFour;
+
+import rip.az.Move;
 
 public class ConnectFourMove extends Move {
     private int column;
