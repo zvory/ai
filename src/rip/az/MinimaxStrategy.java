@@ -1,12 +1,11 @@
 package rip.az;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MinimaxStrategy<B extends Board, M extends Move> extends Strategy {
-    private final int DEPTH = 3;
+public class MinimaxStrategy<B extends Board<M>, M extends Move> extends Strategy {
+    private final int DEPTH = 4;
     private final int ROLLOUT_COUNT = 100;
 
     // board may be won when it's called
@@ -34,9 +33,6 @@ public class MinimaxStrategy<B extends Board, M extends Move> extends Strategy {
         for (int i = 0; i < ROLLOUT_COUNT; i++) {
             score += rollout(board);
         }
-//        System.out.println("Scoring: " + score/ROLLOUT_COUNT);
-//        System.out.println(board);
-//        division by ROLLOUT_COUNT is actually unecessary
         return score / ROLLOUT_COUNT;
     }
 
@@ -74,13 +70,10 @@ public class MinimaxStrategy<B extends Board, M extends Move> extends Strategy {
             }
         }
 
-        Comparator<SearchResult> searchResultComparator = (SearchResult a, SearchResult b) -> {
-            return (int) Math.signum(a.utility - b.utility);
-        };
         if (isCurrentPlayerMax(board)) {
-            return Collections.max(moveResults, searchResultComparator);
+            return Collections.max(moveResults, SearchResult::compareTo);
         } else {
-            return Collections.min(moveResults, searchResultComparator);
+            return Collections.min(moveResults, SearchResult::compareTo);
         }
     }
 
@@ -95,7 +88,6 @@ public class MinimaxStrategy<B extends Board, M extends Move> extends Strategy {
         return result.move;
     }
 
-
     private class SearchResult {
         double utility;
         Move move;
@@ -103,6 +95,10 @@ public class MinimaxStrategy<B extends Board, M extends Move> extends Strategy {
         public SearchResult(double utility, Move move) {
             this.utility = utility;
             this.move = move;
+        }
+
+        public int compareTo(SearchResult other) {
+            return (int) Math.signum(utility - other.utility);
         }
 
         @Override

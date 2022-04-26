@@ -2,7 +2,7 @@ package rip.az;
 
 import java.util.Arrays;
 
-public class ScriptStrategy<B extends Board, M extends Move> extends Strategy<B, M> {
+public class ScriptStrategy<B extends Board<M>, M extends Move> extends Strategy {
     private int[] script = new int[]{
 //            3, 2, 1, 4
             3, 4, 4, 1, 2, 2, 0
