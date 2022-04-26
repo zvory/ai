@@ -6,6 +6,7 @@ import rip.az.LocationGenerator.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 
 public class ConnectFourBoard implements Board {
     public static final LocationGenerator ROW_LOCATION_GENERATOR = new RowLocationGenerator();
@@ -19,18 +20,29 @@ public class ConnectFourBoard implements Board {
     Player[] board;
     int turn;
     int[] heights;
+    List<Integer> moveSequence;
 
     public ConnectFourBoard() {
         this.board = new Player[WIDTH * HEIGHT];
+        this.moveSequence = new ArrayList<>();
         Arrays.fill(this.board, Player.NONE);
         this.turn = 0;
         this.heights = new int[WIDTH];
     }
 
-    private ConnectFourBoard(Player[] board, int turn, int[] heights) {
-        this.board = board;
-        this.turn = turn;
-        this.heights = heights;
+    public void undo() {
+        int toUndo = moveSequence.remove(moveSequence.size() - 1);
+        int boardLocation = rowColumnToBoardIndex(toUndo, heights[toUndo] - 1);
+        heights[toUndo]--;
+        turn--;
+        board[boardLocation] = Player.NONE;
+    }
+
+    @Override
+    public void undoTimes(int times) {
+        for (int i = 0; i < times; i++) {
+            undo();
+        }
     }
 
     public Player getContentsAt(int column, int row) {
@@ -46,12 +58,6 @@ public class ConnectFourBoard implements Board {
 
     private int rowColumnToBoardIndex(int column, int row) {
         return column + row * WIDTH;
-    }
-
-    @Override
-    public ConnectFourBoard clone() {
-        Player[] newBoard = Arrays.copyOf(board, WIDTH * HEIGHT);
-        return new ConnectFourBoard(newBoard, turn, heights);
     }
 
     @Override
@@ -77,7 +83,8 @@ public class ConnectFourBoard implements Board {
         }
     }
 
-    public void applyMove(@NotNull ConnectFourMove move) {
+    public void applyMove(@NotNull Move baseMove) {
+        ConnectFourMove move = ConnectFourMove.class.cast(baseMove);
         int column = move.getColumn();
         int row = openRowForColumn(column);
 
@@ -87,13 +94,14 @@ public class ConnectFourBoard implements Board {
             throw new IllegalArgumentException();
         }
 
+        moveSequence.add(column);
         Player newContents = Player.getTurn(turn);
         turn++;
         board[rowColumnToBoardIndex(column, row)] = newContents;
         heights[column]++;
     }
 
-    public boolean isTie() {
+    public boolean noMoreMovesPossible() {
         for (int height : heights) {
             if (height != HEIGHT) {
                 return false;
@@ -105,6 +113,20 @@ public class ConnectFourBoard implements Board {
     @Override
     public int getTurn() {
         return turn;
+    }
+
+    @Override
+    public Player getCurrentPlayer() {
+        return Player.getTurn(turn);
+    }
+
+    @Override
+    public Move getHumanInput() {
+        System.out.print(this);
+        System.out.print("Your move: ");
+        Scanner scan = new Scanner(System.in);
+        int move = scan.nextInt();
+        return new ConnectFourMove(move);
     }
 
     @Override

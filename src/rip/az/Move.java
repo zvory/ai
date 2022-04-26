@@ -1,4 +1,6 @@
 package rip.az;
 
-public class Move {
+public abstract class Move {
+    @Override
+    public abstract String toString();
 }

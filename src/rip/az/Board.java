@@ -7,7 +7,17 @@ public interface Board {
 
     List<? extends Move> getPossibleMoves();
 
-    boolean isTie();
+    boolean noMoreMovesPossible();
 
     int getTurn();
+
+    Player getCurrentPlayer();
+
+    Move getHumanInput();
+
+    void applyMove(Move m);
+
+    void undo();
+
+    void undoTimes(int movesDone);
 }

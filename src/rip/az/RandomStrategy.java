@@ -1,8 +1,8 @@
 package rip.az;
 
-public class RandomConnectFourStrategy extends ConnectFourStrategy {
+public class RandomStrategy<B extends Board, M extends Move> extends Strategy {
     @Override
-    public ConnectFourMove getMove(ConnectFourBoard board) {
+    public Move getMove(Board board) {
         var moves = board.getPossibleMoves();
         return moves.get(AIUtil.randInRange(moves.size()));
     }
