@@ -2,10 +2,10 @@ package rip.az;
 
 import java.util.List;
 
-public interface Board {
+public interface Board<M extends Move> {
     Player getWinner();
 
-    List<? extends Move> getPossibleMoves();
+    List<M> getPossibleMoves();
 
     boolean noMoreMovesPossible();
 
@@ -13,9 +13,9 @@ public interface Board {
 
     Player getCurrentPlayer();
 
-    Move getHumanInput();
+    M getHumanInput();
 
-    void applyMove(Move m);
+    void applyMove(M m);
 
     void undo();
 

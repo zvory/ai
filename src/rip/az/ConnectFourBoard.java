@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
-public class ConnectFourBoard implements Board {
+public class ConnectFourBoard implements Board<ConnectFourMove> {
     public static final LocationGenerator ROW_LOCATION_GENERATOR = new RowLocationGenerator();
     public static final LocationGenerator DOWN_AND_RIGHT_LOCATION_GENERATOR = new DownAndRightLocationGenerator();
     public static final LocationGenerator UP_AND_RIGHT_LOCATION_GENERATOR = new UpAndRightLocationGenerator();
@@ -83,7 +83,7 @@ public class ConnectFourBoard implements Board {
         }
     }
 
-    public void applyMove(@NotNull Move baseMove) {
+    public void applyMove(@NotNull ConnectFourMove baseMove) {
         ConnectFourMove move = ConnectFourMove.class.cast(baseMove);
         int column = move.getColumn();
         int row = openRowForColumn(column);
@@ -121,7 +121,7 @@ public class ConnectFourBoard implements Board {
     }
 
     @Override
-    public Move getHumanInput() {
+    public ConnectFourMove getHumanInput() {
         System.out.print(this);
         System.out.print("Your move: ");
         Scanner scan = new Scanner(System.in);
