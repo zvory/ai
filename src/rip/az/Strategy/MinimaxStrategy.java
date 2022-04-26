@@ -17,7 +17,7 @@ public class MinimaxStrategy<B extends Board<M>, M extends Move> extends Strateg
     private double rollout(Board board) {
         int movesDone = 0;
         while (!board.noMoreMovesPossible()) {
-            Player winner = board.getWinner();
+            Player winner = board.getIsLatestMoveWinning();
             if (winner != Player.NONE) {
                 board.undoTimes(movesDone);
                 return winner == Player.ONE ? 1 : -1;
@@ -43,7 +43,7 @@ public class MinimaxStrategy<B extends Board<M>, M extends Move> extends Strateg
 
     // Player.ONE is always max
     private SearchResult minimax(Board board, int depth) {
-        Player winner = board.getWinner();
+        Player winner = board.getIsLatestMoveWinning();
         if (winner == Player.ONE) {
             return new SearchResult(Double.MAX_VALUE / 2, null);
         } else if (winner == Player.TWO) {

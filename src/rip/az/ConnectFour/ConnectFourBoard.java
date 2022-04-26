@@ -170,8 +170,7 @@ public class ConnectFourBoard implements Board<ConnectFourMove> {
         return Player.NONE;
     }
 
-    // TODO make this private
-    public int[] getPointDiagonallyLeftBelow(int column, int row) {
+    private int[] getPointDiagonallyLeftBelow(int column, int row) {
         if (column == row) {
             return new int[]{
                     0, 0
@@ -198,8 +197,7 @@ public class ConnectFourBoard implements Board<ConnectFourMove> {
     }
 
 
-    // TODO make this private
-    public int[] getPointDiagonallyLeftAbove(int column, int row) {
+    private int[] getPointDiagonallyLeftAbove(int column, int row) {
         if (row + column == HEIGHT - 1) { // TODO this should be math.min(WIDTH,HEIGHT)-1 or something
             /*
             x......0,5

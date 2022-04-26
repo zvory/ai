@@ -15,16 +15,14 @@ public class Benchmarks {
 
     @org.openjdk.jmh.annotations.Benchmark
     @BenchmarkMode(Mode.Throughput)
-    @Fork(value = 1, warmups = 1)
-    @Warmup(iterations = 1)
+    @Fork(value = 1, warmups = 0)
+    @Warmup(iterations = 0)
     public void measureFastGetWinner(Blackhole blackhole) {
-        ConnectFourBoard board = new ConnectFourBoard();
-        final int testCases = 100;
-        final int seed = 0;
+        final int testCases = 50000;
         int firstWinCount = 0;
-        Random rand = new Random(0);
+        Random rand = new Random();
         for (int test = 0; test < testCases; test++) {
-            board = new ConnectFourBoard();
+            ConnectFourBoard board = new ConnectFourBoard();
             while (!board.noMoreMovesPossible()) {
                 List<ConnectFourMove> moves = board.getPossibleMoves();
                 ConnectFourMove move = moves.get(rand.nextInt(moves.size()));
@@ -39,16 +37,14 @@ public class Benchmarks {
 
     @org.openjdk.jmh.annotations.Benchmark
     @BenchmarkMode(Mode.Throughput)
-    @Fork(value = 1, warmups = 1)
-    @Warmup(iterations = 1)
+    @Fork(value = 1, warmups = 0)
+    @Warmup(iterations = 0)
     public void measureGetWinner(Blackhole blackhole) {
-        ConnectFourBoard board = new ConnectFourBoard();
-        final int testCases = 100;
-        final int seed = 0;
+        final int testCases = 50000;
         int firstWinCount = 0;
-        Random rand = new Random(0);
+        Random rand = new Random();
         for (int test = 0; test < testCases; test++) {
-            board = new ConnectFourBoard();
+            ConnectFourBoard board = new ConnectFourBoard();
             while (!board.noMoreMovesPossible()) {
                 List<ConnectFourMove> moves = board.getPossibleMoves();
                 ConnectFourMove move = moves.get(rand.nextInt(moves.size()));
