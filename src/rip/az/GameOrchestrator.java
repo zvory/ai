@@ -16,6 +16,8 @@ public class GameOrchestrator {
     private Strategy secondStrategy;
     private int testCases;
     private int numThreads;
+    private long firstTimeSpent;
+    private long secondTimeSpent;
 
 
     public GameOrchestrator(Strategy firstStrategy, Strategy secondStrategy, int testCases, int numThreads) {
@@ -36,28 +38,35 @@ public class GameOrchestrator {
         pb.setExtraMessage(message);
     }
 
-    private void addResult(ConcurrentHashMap<Player, Integer> results, Player winner) {
+    private void addResult(ConcurrentHashMap<Player, Integer> results, Game.Result result) {
+        Player winner = result.winner;
         if (results.get(winner) == null) {
             results.put(winner, 1);
         } else {
             results.put(winner, results.get(winner) + 1);
         }
+        firstTimeSpent += result.firstTimeSpent;
+        secondTimeSpent += result.secondTimeSpent;
     }
 
 
     public ConcurrentHashMap<Player, Integer> run() {
         ConcurrentHashMap<Player, Integer> results = new ConcurrentHashMap<>();
+        firstTimeSpent = 0;
+        secondTimeSpent = 0;
+        System.out.println(firstStrategy + " vs " + secondStrategy);
 
-        try (ProgressBar pb = new ProgressBarBuilder().setMaxRenderedLength(150).setTaskName("Running " + testCases + " games in " + numThreads + " threads.").setInitialMax(testCases).showSpeed().build()) {
+        try (ProgressBar pb = new ProgressBarBuilder().setMaxRenderedLength(200).setTaskName("Running " + testCases + " games in " + numThreads + " threads.").setInitialMax(testCases).showSpeed().build()) {
             if (numThreads == 1) {
                 for (int i = 0; i < testCases; i++) {
-                    addResult(results, runGame());
+                    addResult(results, runGame(i));
                     updateProgressBar(pb, results);
                 }
             } else {
                 for (int i = 0; i < testCases; i++) {
+                    final int finalI = i;
                     executor.execute(() -> {
-                        addResult(results, runGame());
+                        addResult(results, runGame(finalI));
                         updateProgressBar(pb, results);
                     });
                 }
@@ -69,13 +78,24 @@ public class GameOrchestrator {
                 }
             }
         }
+        System.out.println("First strategy ran in " + (double) firstTimeSpent / secondTimeSpent + " of the time of the second.");
         return results;// TODO don't return inner class
     }
 
-    private Player runGame() {
+    private Game.Result runGame(int testCase) {
         ConnectFourBoard board = new ConnectFourBoard();
-        Game game = new Game(board, firstStrategy, secondStrategy);
-        Player winner = game.runGame();
-        return winner;
+        Game.Result result;
+        if (testCase % 2 == 0) {
+            Game game = new Game(board, firstStrategy, secondStrategy);
+            result = game.runGame();
+        } else {
+            Game game = new Game(board, secondStrategy, firstStrategy);
+            result = game.runGame();
+            var temp = result.firstTimeSpent;
+            result.firstTimeSpent = result.secondTimeSpent;
+            ;
+            result.secondTimeSpent = temp;
+        }
+        return result;
     }
 }

@@ -13,23 +13,44 @@ public class Game<B extends Board<M>, M extends Move> {
         this.strategyTwo = strategyTwo;
     }
 
-    public Player runGame() {
+    public Result runGame() {
         Strategy<B, M>[] strategies = new Strategy[]{
                 strategyOne,
                 strategyTwo
         };
+        long firstTimeSpent = 0;
+        long secondTimeSpent = 0;
         while (true) {
             Player winner = board.getWinner();
             if (winner != Player.NONE) {
-                return winner;
+                return new Result(winner, firstTimeSpent, secondTimeSpent);
             }
             if (board.noMoreMovesPossible()) {
-                return Player.NONE;
+                return new Result(Player.NONE, firstTimeSpent, secondTimeSpent);
             }
 
+            long startTime = System.nanoTime();
             M move = strategies[board.getTurn() % 2].getMove(board);
+            long endTime = System.nanoTime();
+            long totalTime = endTime - startTime;
+            if (board.getTurn() % 2 == 0) {
+                firstTimeSpent += totalTime;
+            } else {
+                secondTimeSpent += totalTime;
+            }
             board.applyMove(move);
         }
+    }
 
+    public class Result {
+        Player winner;
+        long firstTimeSpent;
+        long secondTimeSpent;
+
+        public Result(Player winner, long firstTimeSpent, long secondTimeSpent) {
+            this.winner = winner;
+            this.firstTimeSpent = firstTimeSpent;
+            this.secondTimeSpent = secondTimeSpent;
+        }
     }
 }

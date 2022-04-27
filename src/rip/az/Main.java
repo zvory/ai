@@ -1,7 +1,7 @@
 package rip.az;
 
+import rip.az.Strategy.AlphaBetaStrategy;
 import rip.az.Strategy.MinimaxStrategy;
-import rip.az.Strategy.MinimaxV2Strategy;
 
 public class Main {
     public static void main(String[] args) {
@@ -11,7 +11,7 @@ public class Main {
 
         GameOrchestrator runner = new GameOrchestrator(
                 new MinimaxStrategy(),
-                new MinimaxV2Strategy(),
+                new AlphaBetaStrategy(),
                 testCases,
                 numThreads
         );
@@ -25,6 +25,6 @@ public class Main {
 
         // one: minimax. two: minimax
         // Done{ONE=62, TWO=32, NONE=6}
-        System.out.println("Done" + results);
+        System.out.println("Done");
     }
 }

@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class MinimaxV2Strategy<B extends Board<M>, M extends Move> extends Strategy {
-    private final int DEPTH = 4;
     private final int ROLLOUT_COUNT = 100;
 
     private boolean isAlmostMated(Board board) {

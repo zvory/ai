@@ -5,20 +5,10 @@ import rip.az.Move;
 import rip.az.Player;
 import rip.az.Util;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class MinimaxStrategy<B extends Board<M>, M extends Move> extends Strategy {
+public class AlphaBetaStrategy<B extends Board<M>, M extends Move> extends Strategy {
     private final int ROLLOUT_COUNT = 100;
-
-    @Override
-    public String toString() {
-        return "MinimaxStrategy{" +
-                "DEPTH=" + DEPTH +
-                ", ROLLOUT_COUNT=" + ROLLOUT_COUNT +
-                '}';
-    }
 
     // board may be won when it's called
     private double rollout(Board board) {
@@ -49,7 +39,7 @@ public class MinimaxStrategy<B extends Board<M>, M extends Move> extends Strateg
     }
 
     // Player.ONE is always max
-    private SearchResult minimax(Board board, int depth) {
+    private SearchResult minimax(Board board, int depth, double atLeastAlpha, double atMostBeta) {
         Player winner = board.getIsLatestMoveWinning();
         if (winner == Player.ONE) {
             return new SearchResult(Double.MAX_VALUE / 2, null);
@@ -65,12 +55,44 @@ public class MinimaxStrategy<B extends Board<M>, M extends Move> extends Strateg
 
         List<Move> moves = (List<Move>) board.getPossibleMoves();
 
-        List<SearchResult> moveResults = moves.stream().map(move -> {
+
+        double v;
+        if (isCurrentPlayerMax(board)) {
+            v = Double.NEGATIVE_INFINITY;
+        } else {
+            v = Double.POSITIVE_INFINITY;
+        }
+
+        Move bestMove = null;
+        for (Move move : moves) {
             board.applyMove(move);
-            SearchResult result = minimax(board, depth - 1);
+            SearchResult result = minimax(board, depth - 1, atLeastAlpha, atMostBeta);
             board.undo();
-            return new SearchResult(result.utility, move);
-        }).collect(Collectors.toList());
+            if (isCurrentPlayerMax(board)) {
+                // if this move is better than our best so far move
+                if (result.utility > v) {
+                    // make it our best move
+                    v = result.utility;
+                    bestMove = move;
+                    // don't consider moves any worse than this
+                    atLeastAlpha = Math.max(atLeastAlpha, v);
+                }
+                //
+                if (v >= atMostBeta) {
+                    return new SearchResult(v, bestMove);
+                }
+            } else {
+                if (result.utility < v) {
+                    v = result.utility;
+                    bestMove = move;
+                    atMostBeta = Math.min(atMostBeta, v);
+                }
+                if (v <= atLeastAlpha) {
+                    return new SearchResult(v, bestMove);
+                }
+            }
+        }
+        return new SearchResult(v, bestMove);
 
 //        if (depth == DEPTH) {
 //            System.out.println("evaluation of moves: ");
@@ -79,11 +101,14 @@ public class MinimaxStrategy<B extends Board<M>, M extends Move> extends Strateg
 //            }
 //        }
 
-        if (isCurrentPlayerMax(board)) {
-            return Collections.max(moveResults, SearchResult::compareTo);
-        } else {
-            return Collections.min(moveResults, SearchResult::compareTo);
-        }
+    }
+
+    @Override
+    public String toString() {
+        return "AlphaBetaStrategy{" +
+                "DEPTH=" + DEPTH +
+                ", ROLLOUT_COUNT=" + ROLLOUT_COUNT +
+                '}';
     }
 
     private boolean isCurrentPlayerMax(Board board) {
@@ -92,7 +117,7 @@ public class MinimaxStrategy<B extends Board<M>, M extends Move> extends Strateg
 
     @Override
     public Move getMove(Board board) {
-        SearchResult result = minimax(board, DEPTH);
+        SearchResult result = minimax(board, DEPTH, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 //        System.out.println("AI EVALUATION: " + result.utility + " Doing move " + result.move + " for turn " + board.getTurn());
         return result.move;
     }
