@@ -9,23 +9,53 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MinimaxStrategy<B extends Board<M>, M extends Move> extends Strategy {
+public class MinimaxV2Strategy<B extends Board<M>, M extends Move> extends Strategy {
     private final int DEPTH = 4;
     private final int ROLLOUT_COUNT = 100;
 
-    // board may be won when it's called
+    private boolean isAlmostMated(Board board) {
+        List<Move> moves = (List<Move>) board.getPossibleMoves();
+        for (Move move : moves) {
+            board.applyMove(move);
+            if (board.getIsLatestMoveWinning() != Player.NONE) {
+                board.undo();
+                return true;
+            }
+            board.undo();
+        }
+        return false;
+    }
+
     private double rollout(Board board) {
         int movesDone = 0;
         while (!board.noMoreMovesPossible()) {
-            Player winner = board.getIsLatestMoveWinning();
-            if (winner != Player.NONE) {
-                board.undoTimes(movesDone);
-                return winner == Player.ONE ? 1 : -1;
-            } else {
-                List<Move> moves = (List<Move>) board.getPossibleMoves();
-                movesDone++;
-                Move move = moves.get(Util.randInRange(moves.size()));
+            List<Move> moves = (List<Move>) board.getPossibleMoves();
+            Player currentPlayer = board.getCurrentPlayer();
+            boolean didMove = false;
+
+            // select a move that doesn't leave us almost mated
+            while (moves.size() != 0) {
+                Move move = moves.remove(Util.randInRange(moves.size()));
                 board.applyMove(move);
+                movesDone++;
+
+                Player winner = board.getIsLatestMoveWinning();
+                // this move won us the game
+                if (winner == currentPlayer) {
+                    board.undoTimes(movesDone);
+                    return winner == Player.ONE ? -1 : 1;
+                }
+
+                // so we didn't win
+                // are we about to lose and there's another move?
+                if (moves.size() > 0 && isAlmostMated(board)) {
+                    // do another move
+                    board.undo();
+                    movesDone--;
+                } else {
+                    // take the move
+                    break;
+                }
             }
         }
         board.undoTimes(movesDone);
@@ -36,6 +66,7 @@ public class MinimaxStrategy<B extends Board<M>, M extends Move> extends Strateg
     private double rollouts(Board board) {
         double score = 0;
         for (int i = 0; i < ROLLOUT_COUNT; i++) {
+            Board before = board.clone();
             score += rollout(board);
         }
         return score / ROLLOUT_COUNT;

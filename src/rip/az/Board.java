@@ -21,5 +21,7 @@ public interface Board<M extends Move> {
 
     void undo();
 
+    Board clone();
+
     void undoTimes(int movesDone);
 }

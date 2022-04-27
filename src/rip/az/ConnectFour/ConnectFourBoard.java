@@ -44,6 +44,24 @@ public class ConnectFourBoard implements Board<ConnectFourMove> {
     }
 
     @Override
+    public Board clone() {
+        ConnectFourBoard newBoard = new ConnectFourBoard();
+        newBoard.board = board.clone();
+        newBoard.turn = turn;
+        newBoard.heights = heights.clone();
+        newBoard.moveSequence = new ArrayList<>(moveSequence);
+        return newBoard;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ConnectFourBoard)) return false;
+        ConnectFourBoard that = (ConnectFourBoard) o;
+        return WIDTH == that.WIDTH && HEIGHT == that.HEIGHT && CONNECT_AMOUNT == that.CONNECT_AMOUNT && turn == that.turn && Arrays.equals(board, that.board) && Arrays.equals(heights, that.heights) && moveSequence.equals(that.moveSequence);
+    }
+
+    @Override
     public void undoTimes(int times) {
         for (int i = 0; i < times; i++) {
             undo();
@@ -243,6 +261,7 @@ public class ConnectFourBoard implements Board<ConnectFourMove> {
      */
     @Override
     public Player getIsLatestMoveWinning() {
+        if (turn == 0) return Player.NONE;
         int column = moveSequence.get(moveSequence.size() - 1);
         int row = heights[column] - 1;
 

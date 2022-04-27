@@ -1,32 +1,30 @@
 package rip.az;
 
-import rip.az.Strategy.HumanInputStrategy;
-import rip.az.Strategy.MinimaxStrategy;
 import rip.az.Strategy.Strategy;
 
 public class Game<B extends Board<M>, M extends Move> {
     private B board;
+    private Strategy strategyOne;
+    private Strategy strategyTwo;
 
-    public Game(B board) {
+    public Game(B board, Strategy strategyOne, Strategy strategyTwo) {
         this.board = board;
+        this.strategyOne = strategyOne;
+        this.strategyTwo = strategyTwo;
     }
 
-    public void runGame() {
+    public Player runGame() {
         Strategy<B, M>[] strategies = new Strategy[]{
-                new HumanInputStrategy<B, M>(),
-//                new ScriptStrategy(),
-                new MinimaxStrategy<B, M>()
-
+                strategyOne,
+                strategyTwo
         };
         while (true) {
             Player winner = board.getWinner();
             if (winner != Player.NONE) {
-                System.out.println("Player " + winner.name() + " wins!");
-                System.exit(0);
+                return winner;
             }
             if (board.noMoreMovesPossible()) {
-                System.out.println("Tie!");
-                System.exit(0);
+                return Player.NONE;
             }
 
             M move = strategies[board.getTurn() % 2].getMove(board);
